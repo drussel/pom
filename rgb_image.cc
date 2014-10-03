@@ -23,7 +23,7 @@
 
 using namespace std;
 
-#include <libpng/png.h>
+#include <libpng16/png.h>
 
 #include "rgb_image.h"
 
@@ -198,13 +198,13 @@ void RGBImage::read_png(char* name) {
   png_set_sig_bytes(png_ptr, header_size);
   png_read_info(png_ptr, info_ptr);
 
-  _width = info_ptr->width;
-  _height = info_ptr->height;
+  _width = png_get_image_width(png_ptr, info_ptr);
+  _height = png_get_image_height(png_ptr, info_ptr);
 
   png_byte bit_depth, color_type, channels;
-  color_type = info_ptr->color_type;
-  bit_depth = info_ptr->bit_depth;
-  channels = info_ptr->channels;
+  color_type = png_get_color_type(png_ptr, info_ptr);
+  bit_depth = png_get_bit_depth(png_ptr, info_ptr);
+  channels = png_get_channels(png_ptr, info_ptr);
 
   if(bit_depth != 8) {
     cerr << "Can only read 8-bits PNG images." << endl;
@@ -214,7 +214,7 @@ void RGBImage::read_png(char* name) {
   // allocate image pointer
   row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * _height);
   for (int y = 0; y < _height; y++)
-    row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+    row_pointers[y] = (png_byte*) malloc(png_get_rowbytes(png_ptr, info_ptr));
 
   allocate();
 
@@ -319,7 +319,7 @@ void RGBImage::write_png(char *name) {
   // allocate memory
   row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * _height);
   for (int y = 0; y < _height; y++)
-    row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+    row_pointers[y] = (png_byte*) malloc(png_get_rowbytes(png_ptr, info_ptr));
 
   int k;
   for (int y = 0; y < _height; y++) {
